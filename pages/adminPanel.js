@@ -8,11 +8,11 @@ export default function AdminPanel() {
   const [formData, setFormData] = useState({
     title: "",
     shortDescription: "",
-    thumbnail: "",
+    thumbnail: null,
     detailImages: [
-      { image: "", description: "" },
-      { image: "", description: "" },
-      { image: "", description: "" },
+      { image: null, description: "" },
+      { image: null, description: "" },
+      { image: null, description: "" },
     ],
   });
   const [editMode, setEditMode] = useState(false);
@@ -36,38 +36,78 @@ export default function AdminPanel() {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setFormData({ ...formData, [name]: files[0] });
+  };
+
   const handleDetailChange = (index, field, value) => {
     const updatedDetails = [...formData.detailImages];
-    updatedDetails[index][field] = value;
+    if (field === "image") {
+      updatedDetails[index][field] = value.target.files[0];
+    } else {
+      updatedDetails[index][field] = value;
+    }
     setFormData({ ...formData, detailImages: updatedDetails });
   };
 
   const handleSubmit = async () => {
+    const data = new FormData();
+    data.append("title", formData.title);
+    data.append("shortDescription", formData.shortDescription);
+    
+    if (formData.thumbnail) {
+      data.append("thumbnail", formData.thumbnail);
+    }
+
+    formData.detailImages.forEach((detail, index) => {
+      if (detail.image) {
+        data.append(`detailImages[${index}][image]`, detail.image);
+      }
+      data.append(`detailImages[${index}][description]`, detail.description);
+    });
+
     try {
       if (editMode) {
-        await axios.put(`${API_URL}/${currentProject._id}`, formData);
+        await axios.put(`${API_URL}/${currentProject._id}`, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       } else {
-        await axios.post(`${API_URL}/add`, formData);
+        await axios.post(`${API_URL}/add`, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
       fetchProjects();
-      setFormData({
-        title: "",
-        shortDescription: "",
-        thumbnail: "",
-        detailImages: [
-          { image: "", description: "" },
-          { image: "", description: "" },
-          { image: "", description: "" },
-        ],
-      });
       setEditMode(false);
+      resetForm();
     } catch (error) {
       console.error("Error submitting project:", error);
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      shortDescription: "",
+      thumbnail: null,
+      detailImages: [
+        { image: null, description: "" },
+        { image: null, description: "" },
+        { image: null, description: "" },
+      ],
+    });
+  };
+
   const handleEdit = (project) => {
-    setFormData(project);
+    setFormData({
+      title: project.title,
+      shortDescription: project.shortDescription,
+      thumbnail: null,
+      detailImages: project.detailImages.map((d) => ({
+        image: null,
+        description: d.description,
+      })),
+    });
     setEditMode(true);
     setCurrentProject(project);
   };
@@ -83,11 +123,11 @@ export default function AdminPanel() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-4xl font-bold mb-8 text-center">Admin Panel</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center">Admin Panel</h1>
 
-      {/* Form Section */}
-      <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg max-w-xl mx-auto">
-        <h2 className="text-2xl mb-4 font-semibold text-center">
+      {/* Form */}
+      <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg">
+        <h2 className="text-2xl mb-4 font-semibold">
           {editMode ? "Edit Project" : "Add Project"}
         </h2>
 
@@ -97,7 +137,7 @@ export default function AdminPanel() {
             value={formData.title}
             onChange={handleInputChange}
             placeholder="Project Title"
-            className="bg-gray-700 p-3 rounded w-full border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="bg-gray-700 p-3 rounded w-full mb-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
           />
 
           <textarea
@@ -105,31 +145,29 @@ export default function AdminPanel() {
             value={formData.shortDescription}
             onChange={handleInputChange}
             placeholder="Short Description"
-            className="bg-gray-700 p-3 rounded w-full border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="bg-gray-700 p-3 rounded w-full mb-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
           />
 
           <input
+            type="file"
             name="thumbnail"
-            value={formData.thumbnail}
-            onChange={handleInputChange}
-            placeholder="Thumbnail URL"
-            className="bg-gray-700 p-3 rounded w-full border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={handleFileChange}
+            className="bg-gray-700 p-2 mb-4 w-full text-white"
           />
 
-          <h3 className="text-lg font-semibold">Detail Images</h3>
+          <h3 className="text-lg mb-2">Detail Images</h3>
           {formData.detailImages.map((detail, index) => (
-            <div key={index} className="space-y-2 mb-4">
+            <div key={index} className="bg-gray-700 p-4 rounded mb-4">
               <input
-                value={detail.image}
-                onChange={(e) => handleDetailChange(index, "image", e.target.value)}
-                placeholder={`Image URL ${index + 1}`}
-                className="bg-gray-700 p-2 w-full rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                type="file"
+                onChange={(e) => handleDetailChange(index, "image", e)}
+                className="bg-gray-600 p-2 mb-2 w-full rounded text-white"
               />
               <input
+                placeholder={`Description ${index + 1}`}
                 value={detail.description}
                 onChange={(e) => handleDetailChange(index, "description", e.target.value)}
-                placeholder={`Description ${index + 1}`}
-                className="bg-gray-700 p-2 w-full rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                className="bg-gray-600 p-2 mb-2 w-full rounded text-white"
               />
             </div>
           ))}
@@ -137,13 +175,12 @@ export default function AdminPanel() {
 
         <button
           onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 transition px-4 py-2 rounded mt-4 w-full"
+          className="bg-blue-600 px-4 py-2 mt-4 rounded hover:bg-blue-700 transition"
         >
           {editMode ? "Update Project" : "Add Project"}
         </button>
       </div>
 
-      {/* Projects Section */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
           <div key={project._id} className="bg-gray-800 p-4 rounded-lg shadow-lg relative">
@@ -154,24 +191,16 @@ export default function AdminPanel() {
             />
             <h2 className="text-lg font-bold">{project.title}</h2>
             <p className="text-gray-400 mb-2">{project.shortDescription}</p>
-
-            {project.detailImages.map((detail, index) => (
-              <div key={index} className="mb-2">
-                <p className="text-sm text-gray-300">Image: {detail.image}</p>
-                <p className="text-sm text-gray-300">Description: {detail.description}</p>
-              </div>
-            ))}
-
             <div className="flex justify-end mt-4 gap-2">
               <button
                 onClick={() => handleEdit(project)}
-                className="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded"
+                className="bg-yellow-500 px-3 py-1 rounded"
               >
                 Edit
               </button>
               <button
                 onClick={() => handleDelete(project._id)}
-                className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+                className="bg-red-600 px-3 py-1 rounded"
               >
                 Delete
               </button>
@@ -182,6 +211,9 @@ export default function AdminPanel() {
     </div>
   );
 }
+
+
+
 
 
 
