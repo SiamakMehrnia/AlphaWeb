@@ -3,9 +3,12 @@ import connectDB from "@/lib/db";
 import Project from "@/models/Project";
 
 export default async function handler(req, res) {
+  // تنظیمات CORS
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-
-  // Handle OPTIONS Request
+  // هندل کردن متد OPTIONS برای Preflight Request
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
