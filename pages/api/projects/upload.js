@@ -1,39 +1,54 @@
-import connectDB from "@/lib/db";
-import Project from "@/models/Project";
+// /pages/api/upload.js
+import nextConnect from "next-connect";
+import multer from "multer";
+import mongoose from "mongoose";
+import { GridFsStorage } from "multer-gridfs-storage";
+
+const MONGO_URI = process.env.MONGO_URI;
+
+// اتصال به دیتابیس
+const connectDB = async () => {
+  if (!mongoose.connection.readyState) {
+    await mongoose.connect(MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  }
+};
+
+connectDB();
+
+const storage = new GridFsStorage({
+  url: MONGO_URI,
+  options: { useNewUrlParser: true, useUnifiedTopology: true },
+  file: (req, file) => {
+    return {
+      filename: Date.now() + "-" + file.originalname,
+    };
+  },
+});
+
+const upload = multer({ storage });
+
+const handler = nextConnect();
+
+handler.use(upload.single("file"));
+
+handler.post(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  res.status(200).json({
+    fileId: req.file.id,
+    fileName: req.file.filename,
+  });
+});
+
+export default handler;
 
 export const config = {
   api: {
-    bodyParser: true,
+    bodyParser: false,
   },
 };
-
-const handler = async (req, res) => {
-  await connectDB();
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Only POST requests are allowed" });
-  }
-
-  const { title, shortDescription, thumbnail, detailImages } = req.body;
-
-  if (!title || !shortDescription || !thumbnail) {
-    return res.status(400).json({ message: "Title, shortDescription, and thumbnail are required" });
-  }
-
-  try {
-    const newProject = new Project({
-      title,
-      shortDescription,
-      thumbnail,
-      detailImages,
-    });
-
-    await newProject.save();
-    return res.status(200).json({ message: "Project added successfully", project: newProject });
-  } catch (error) {
-    console.error("Error saving project:", error);
-    return res.status(500).json({ message: "Error saving project", error });
-  }
-};
-
-export default handler;
