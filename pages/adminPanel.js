@@ -83,63 +83,67 @@ export default function AdminPanel() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">Admin Panel</h1>
+      <h1 className="text-4xl font-bold mb-8 text-center">Admin Panel</h1>
 
-      {/* Form */}
-      <div className="bg-gray-800 p-6 rounded-lg mb-8">
-        <h2 className="text-xl mb-4">{editMode ? "Edit Project" : "Add Project"}</h2>
-        
-        <input
-          name="title"
-          value={formData.title}
-          onChange={handleInputChange}
-          placeholder="Project Title"
-          className="bg-gray-700 p-2 mb-4 w-full rounded"
-        />
+      {/* Form Section */}
+      <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg max-w-xl mx-auto">
+        <h2 className="text-2xl mb-4 font-semibold text-center">
+          {editMode ? "Edit Project" : "Add Project"}
+        </h2>
 
-        <textarea
-          name="shortDescription"
-          value={formData.shortDescription}
-          onChange={handleInputChange}
-          placeholder="Short Description"
-          className="bg-gray-700 p-2 mb-4 w-full rounded"
-        />
+        <div className="space-y-4">
+          <input
+            name="title"
+            value={formData.title}
+            onChange={handleInputChange}
+            placeholder="Project Title"
+            className="bg-gray-700 p-3 rounded w-full border border-gray-600 focus:border-blue-500 focus:outline-none"
+          />
 
-        <input
-          name="thumbnail"
-          value={formData.thumbnail}
-          onChange={handleInputChange}
-          placeholder="Thumbnail URL"
-          className="bg-gray-700 p-2 mb-4 w-full rounded"
-        />
+          <textarea
+            name="shortDescription"
+            value={formData.shortDescription}
+            onChange={handleInputChange}
+            placeholder="Short Description"
+            className="bg-gray-700 p-3 rounded w-full border border-gray-600 focus:border-blue-500 focus:outline-none"
+          />
 
-        <h3 className="text-lg mb-2">Detail Images</h3>
-        {formData.detailImages.map((detail, index) => (
-          <div key={index} className="mb-4">
-            <input
-              value={detail.image}
-              onChange={(e) => handleDetailChange(index, "image", e.target.value)}
-              placeholder={`Image URL ${index + 1}`}
-              className="bg-gray-700 p-2 mb-2 w-full rounded"
-            />
-            <input
-              value={detail.description}
-              onChange={(e) => handleDetailChange(index, "description", e.target.value)}
-              placeholder={`Description ${index + 1}`}
-              className="bg-gray-700 p-2 mb-2 w-full rounded"
-            />
-          </div>
-        ))}
+          <input
+            name="thumbnail"
+            value={formData.thumbnail}
+            onChange={handleInputChange}
+            placeholder="Thumbnail URL"
+            className="bg-gray-700 p-3 rounded w-full border border-gray-600 focus:border-blue-500 focus:outline-none"
+          />
+
+          <h3 className="text-lg font-semibold">Detail Images</h3>
+          {formData.detailImages.map((detail, index) => (
+            <div key={index} className="space-y-2 mb-4">
+              <input
+                value={detail.image}
+                onChange={(e) => handleDetailChange(index, "image", e.target.value)}
+                placeholder={`Image URL ${index + 1}`}
+                className="bg-gray-700 p-2 w-full rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+              />
+              <input
+                value={detail.description}
+                onChange={(e) => handleDetailChange(index, "description", e.target.value)}
+                placeholder={`Description ${index + 1}`}
+                className="bg-gray-700 p-2 w-full rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          ))}
+        </div>
 
         <button
           onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 transition px-4 py-2 rounded"
+          className="bg-blue-600 hover:bg-blue-700 transition px-4 py-2 rounded mt-4 w-full"
         >
           {editMode ? "Update Project" : "Add Project"}
         </button>
       </div>
 
-      {/* Projects */}
+      {/* Projects Section */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
           <div key={project._id} className="bg-gray-800 p-4 rounded-lg shadow-lg relative">
@@ -178,6 +182,7 @@ export default function AdminPanel() {
     </div>
   );
 }
+
 
 
 
