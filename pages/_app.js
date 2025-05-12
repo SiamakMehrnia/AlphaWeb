@@ -1,5 +1,19 @@
-import "@/styles/globals.css";
+import "@/styles/globals.css"; // مسیر صحیح فایل استایل
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { AnimatePresence } from "framer-motion";
 
-export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} />;
+export default function MyApp({ Component, pageProps }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    // برای اطمینان از رندر صحیح Tailwind
+    document.body.classList.add("bg-black", "text-white");
+  }, []);
+
+  return (
+    <AnimatePresence mode="wait">
+      <Component {...pageProps} key={router.asPath} />
+    </AnimatePresence>
+  );
 }
