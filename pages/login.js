@@ -1,16 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+import Cookies from "js-cookie";
 
 export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  useEffect(() => {
+    const token = Cookies.get("auth");
+        console.log("Token from Cookies on useEffect:", token);
+    if (token) {
+      axios
+        .get("/api/auth/checkAuth", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            router.push("/admin");
+          }
+        })
+        .catch(() => {
+          Cookies.remove("auth");
+        });
+    }
+  }, [router]);
 
   const handleLogin = async () => {
     try {
       const response = await axios.post("/api/auth/login", { password });
+
       if (response.status === 200) {
+        Cookies.set("auth", response.data.token, {
+                    
+          path: "/",
+
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "Strict",
+        });
         router.push("/admin");
       }
     } catch (err) {

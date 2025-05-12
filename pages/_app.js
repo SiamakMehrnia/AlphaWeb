@@ -2,6 +2,7 @@ import "@/styles/globals.css"; // مسیر صحیح فایل استایل
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { AnimatePresence } from "framer-motion";
+import Navbar from "@/components/Navbar"; // افزودن Navbar
 
 export default function MyApp({ Component, pageProps }) {
   const router = useRouter();
@@ -12,8 +13,10 @@ export default function MyApp({ Component, pageProps }) {
   }, []);
 
   return (
-    <AnimatePresence mode="wait">
-      <Component {...pageProps} key={router.asPath} />
-    </AnimatePresence>
+    <>
+      <AnimatePresence mode="wait">
+        <Component {...pageProps} key={router.asPath} />
+      </AnimatePresence>
+    </>
   );
 }
