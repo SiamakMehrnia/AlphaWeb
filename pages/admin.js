@@ -25,12 +25,7 @@ export default function Admin() {
   const baseURL =
     process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
 
-useEffect(() => {
-  const token = Cookies.get("auth");
-    if(!token){
-      router.push("/login");
-    }
-}, [router]);
+ 
 
   const fetchProjects = async () => {
     setLoading(true);
