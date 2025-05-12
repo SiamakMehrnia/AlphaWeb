@@ -22,11 +22,11 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const baseURL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
+  const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || (typeof window !== "undefined" ? window.location.origin : "");
 
  
 
+  // Fetch projects function to be used in multiple places
   const fetchProjects = async () => {
     setLoading(true);
     try {
@@ -34,7 +34,6 @@ export default function Admin() {
       setProjects(response.data.projects || []);
     } catch (error) {
       console.error("Error fetching projects:", error);
-      setNotification({ type: "error", message: "Error fetching projects" });
     } finally {
       setLoading(false);
     }
@@ -42,7 +41,8 @@ export default function Admin() {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseURL]);
 
   const resetForm = () => {
     setTitle("");
@@ -97,7 +97,7 @@ export default function Admin() {
         detailImages: formattedDetails,
       };
 
-      await axios.put(`${baseURL}/api/projects/${editingProjectId}`, payload);
+      await axios.put(`/api/projects/${editingProjectId}`, payload);
       setNotification({
         type: "success",
         message: "✅ Project updated successfully!",
